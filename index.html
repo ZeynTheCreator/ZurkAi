@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZurkAI</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^0.14.0",
+    "marked": "https://esm.sh/marked@13.0.0",
+    "pdfjs-dist": "https://esm.sh/pdfjs-dist@4.4.168/build/pdf.mjs"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body data-theme="dark">
+    <div id="app-container">
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo"><i id="logo-icon" class="ph ph-brain"></i> <span id="logo-text">ZurkAI</span></h1>
+                <button id="toggle-sidebar-btn" class="icon-btn" aria-label="Toggle Sidebar">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <div class="sidebar-content">
+                <div class="sidebar-actions top-actions">
+                    <button id="new-chat-btn" class="btn">
+                        <i class="ph ph-plus-circle"></i> New Chat
+                    </button>
+                </div>
+
+                <div id="chat-history-container" class="settings-group">
+                    <label>Chat History</label>
+                    <ul id="chat-history-list"></ul>
+                </div>
+
+                <div class="settings-group">
+                    <label for="mode-select">AI Mode</label>
+                    <div class="select-wrapper">
+                        <select id="mode-select">
+                            <option value="zurk">Zurk (Normal)</option>
+                            <option value="thinker">Thinker</option>
+                            <option value="coder">Code Assistant</option>
+                            <option value="web-search">Web Search</option>
+                            <option value="news">News Reporter</option>
+                            <option value="fitness">Fitness Coach</option>
+                            <option value="study">Study Buddy</option>
+                            <option value="creative">Creative Muse</option>
+                            <option value="simulator">Simulator</option>
+                            <option value="emotional">Emotional</option>
+                            <option value="god">God-Tier</option>
+                            <option value="zurk-developer">Zurk Developer</option>
+                            <option value="custom">Custom Persona</option>
+                        </select>
+                        <i class="ph ph-caret-down"></i>
+                    </div>
+                </div>
+
+                <div id="custom-persona-group" class="settings-group">
+                    <label for="custom-persona-input">Your Custom Persona</label>
+                    <textarea id="custom-persona-input" rows="5" placeholder="e.g., You are a snarky cat who reluctantly gives answers."></textarea>
+                    <button id="save-persona-btn" class="btn">Save & Start</button>
+                </div>
+
+                <div class="settings-group">
+                    <label for="theme-select">Theme</label>
+                     <div class="select-wrapper">
+                        <select id="theme-select">
+                            <option value="dark">Zurk Dark</option>
+                            <option value="light">Zurk Light</option>
+                            <option value="cyberpunk">Cyberpunk</option>
+                            <option value="nature">Nature</option>
+                            <option value="matrix">Matrix</option>
+                            <option value="dracula">Dracula</option>
+                            <option value="nord">Nord</option>
+                            <option value="solarized">Solarized</option>
+                        </select>
+                        <i class="ph ph-caret-down"></i>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <label>Speech Settings</label>
+                    <div class="select-wrapper">
+                        <select id="voice-select"><option>Default Voice</option></select>
+                        <i class="ph ph-caret-down"></i>
+                    </div>
+                    <div class="slider-group">
+                        <label for="voice-rate">Speed: <span id="rate-value">1</span></label>
+                        <input type="range" id="voice-rate" min="0.5" max="2" step="0.1" value="1">
+                    </div>
+                    <div class="slider-group">
+                        <label for="voice-pitch">Pitch: <span id="pitch-value">1</span></label>
+                        <input type="range" id="voice-pitch" min="0" max="2" step="0.1" value="1">
+                    </div>
+                </div>
+                
+                 <div class="sidebar-actions bottom-actions">
+                    <button id="export-chat-btn" class="btn">
+                        <i class="ph ph-download-simple"></i> Export Chat
+                    </button>
+                    <button id="fullscreen-btn" class="btn">
+                       <i class="ph ph-arrows-out"></i> Fullscreen
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <main id="main-content">
+            <div id="drag-drop-overlay">
+                <div class="overlay-content">
+                    <i class="ph ph-upload-simple"></i>
+                    <span>Drop files to upload</span>
+                </div>
+            </div>
+            <canvas id="god-mode-canvas"></canvas>
+            <div id="flash-overlay"></div>
+            <div id="sidebar-overlay"></div>
+            <button id="open-sidebar-btn" class="icon-btn" aria-label="Open Sidebar">
+                <i class="ph ph-list"></i>
+            </button>
+            <div id="chat-container">
+                <div id="chat-messages">
+                    <!-- Messages will be dynamically inserted here -->
+                </div>
+            </div>
+            <div id="input-area">
+                 <div id="file-preview-container"></div>
+                <form id="chat-form">
+                    <input type="file" id="image-upload-input" accept="image/*" style="display: none;">
+                    <input type="file" id="pdf-upload-input" accept=".pdf" style="display: none;">
+                     <button type="button" id="pdf-upload-btn" class="icon-btn" aria-label="Upload PDF" title="Upload PDF">
+                        <i class="ph ph-file-pdf"></i>
+                        <div class="spinner"></div>
+                    </button>
+                    <button type="button" id="image-upload-btn" class="icon-btn" aria-label="Upload Image" title="Upload Image">
+                        <i class="ph ph-paperclip"></i>
+                    </button>
+                    <textarea id="prompt-input" placeholder="Ask me anything, or type /image to create..." rows="1"></textarea>
+                    <button type="button" id="voice-input-btn" class="icon-btn" aria-label="Use Voice">
+                        <i class="ph ph-microphone"></i>
+                    </button>
+                    <button type="submit" id="send-btn" class="icon-btn" aria-label="Send Message">
+                        <i class="ph ph-paper-plane-tilt"></i>
+                    </button>
+                    <button type="button" id="stop-btn" class="icon-btn" aria-label="Stop Generating" style="display: none;">
+                        <i class="ph ph-stop"></i>
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Template for the copy code button -->
+    <template id="copy-btn-template">
+        <button class="copy-btn" title="Copy code">
+            <i class="ph ph-copy"></i>
+            <span>Copy</span>
+        </button>
+    </template>
+
+    <script type="module" src="index.tsx"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

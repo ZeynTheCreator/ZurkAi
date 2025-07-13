@@ -1,0 +1,8 @@
+
+{
+  "name": "ZurkAI",
+  "description": "ZurkAI is a revolutionary AI assistant with an advanced UI, multiple operational modes, and powerful functions including image generation and voice interaction.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
